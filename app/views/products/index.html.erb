@@ -1,1 +1,39 @@
+<% @products.each do |product| %>
+  <h3 data-id= <%=product.id %>><%= product.name %></h3>
+  <% if product.description %>
+    <h4 data-id= <%=product.id %>><%= product.description.truncate(10) %></h4>
+  <% end %>
+    <button type="button" id="more-info-<%= product.id %>">More Info</button>
+<% end %>
 
+<script type="text/javascript">
+  function getDescription(ev) {
+    ev.preventDefault()
+    productId = parseInt(ev.target.id.split("-").slice(-1)[0])
+    fetch(`/products/${productId}/description`)
+      .then(res => res.text())
+      .then(res => {
+        document.querySelector(`h4[data-id="${productId}"]`).innerText = res
+      })
+  }
+
+  function getInventory(ev) {
+    ev.preventDefault()
+    productId = parseInt(ev.target.id.split("-").slice(-1)[0])
+    fetch(`/products/${productId}/inventory`)
+      .then(res => res.text())
+      .then(res => {
+        res = res ? "Available" : "Sold Out"
+        spot = document.querySelector(`h4[data-id="${productId}"]`)
+        div = document.createElement('div')
+        div.innerText = `Inventory: ${res}`
+        spot.append(div)
+      })
+  }
+
+  let buttons = Array.from(document.getElementsByTagName('button'));
+  buttons.forEach(b => {
+    b.addEventListener('click', (ev) => getDescription(ev))
+    b.addEventListener('click', (ev) => getInventory(ev))
+  })
+</script>
